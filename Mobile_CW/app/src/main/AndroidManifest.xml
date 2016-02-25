@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.chaos_000.mobile_cw">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,5 +18,14 @@
             </intent-filter>
         </activity>
     </application>
-
+    <!--/**
+        * Created by chaos_000 on 25/02/2016.
+        * Liam Faulds S1306716
+        *
+        * Tutorials Used:
+        * http://www.tutorialspoint.com/android/android_xml_parsers.htm
+        *  ^ First Accessed 18/02/2016, used as an initial guide to parsing
+        * http://www.technotalkative.com/android-listview-2-custom-listview/
+        *  ^ First Accessed 24/02/2016, used to group a pair of TextViews into a ListView
+        */-->
 </manifest>
