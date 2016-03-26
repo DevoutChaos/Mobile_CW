@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import android.graphics.Typeface;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,17 +38,20 @@ import java.util.List;
  * ^ First Accessed 18/02/2016, used as an initial guide to parsing
  * http://www.technotalkative.com/android-listview-2-custom-listview/
  * ^ First Accessed 24/02/2016, used to group a pair of TextViews into a ListView
+ *
+ * GOOGLE VIEWSWITCHER!!!
  */
 
-public class MainActivity extends ActionBarActivity {
-    Button but1;
+public class MainActivity extends Activity implements OnItemClickListener{
+    Button but1, but2;
     ListView lstVw1;
     ListViewAdapter lstVwAda;
+    TextView tit, desc;
+    private ViewSwitcher switcher;
+    private static final int REFRESH_SCREEN = 1;
 
     private String rdWrks = "http://trafficscotland.org/rss/feeds/roadworks.aspx";
     private HandleXML xmlObj;
-    private ArrayAdapter<String> titAdptr;
-    private ArrayAdapter<String> desAdptr;
 
     String[] titleArr;
     String[] descArr;
@@ -54,7 +60,11 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        switcher = (ViewSwitcher) findViewById(R.id.ViewSwitcher);
         but1 = (Button) findViewById(R.id.button);
+        but2 = (Button) findViewById(R.id.button2);
+        tit = (TextView) findViewById(R.id.titTxtView);
+        desc = (TextView) findViewById(R.id.descTxtView);
         lstVw1 = (ListView) findViewById(R.id.mainListView);
 
         but1.setOnClickListener(new View.OnClickListener() {
@@ -66,14 +76,64 @@ public class MainActivity extends ActionBarActivity {
                 ImportantThing();
             }
         });
+
+        but2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnotherImportantThing();
+            }
+        });
     }
 
     public void ImportantThing() {
         titleArr = HandleXML.titleLst.toArray(new String[0]);
         descArr = HandleXML.descLst.toArray(new String[0]);
         lstVwAda = new ListViewAdapter(this, titleArr, descArr);
-        //lstVwAda = new ListViewAdapter(this, month, number);
         lstVw1.setAdapter(lstVwAda);
+        lstVw1.setOnItemClickListener(this);
         System.out.println("adapter => " + lstVwAda.getCount());
     }
+
+    public void AnotherImportantThing()
+    {
+        switcher.showPrevious();
+    }
+
+    public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id)
+    {
+        //Toast.makeText(this, "Title: " + titleArr[position] + "\n Description: \n" + descArr[position], Toast.LENGTH_LONG).show();
+        tit.setText(titleArr[position]);
+        desc.setText(descArr[position]);
+
+        new Thread()
+        {
+            public void run()
+            {
+                try
+                {
+                    Refresh.sendEmptyMessage(REFRESH_SCREEN);
+                }
+                catch(Exception e)
+                {
+
+                }
+            }
+        }.start();
+    }
+
+    Handler Refresh = new Handler()
+    {
+        public void handleMessage(Message msg)
+        {
+            switch(msg.what)
+            {
+                case REFRESH_SCREEN:
+                    switcher.showNext();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    };
 }

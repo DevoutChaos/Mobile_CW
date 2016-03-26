@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * Created by chaos_000 on 25/02/2016.
@@ -21,14 +23,16 @@ import java.util.List;
  */
 
 public class HandleXML {
-    private String title = "title";
-    private String desc = "desc";
+    private String title, description;
     private String urlString = null;
     private XmlPullParserFactory xmlFactoryObject;
     public volatile boolean parsingComplete = true;
+    private boolean firstDesc = false;
 
     public static List<String> titleLst = new ArrayList<>();
     public static List<String> descLst = new ArrayList<>();
+    public static List<String> startDate = new ArrayList<>();
+    public static List<String> endDate = new ArrayList<>();
 
     public HandleXML(String url) {
         this.urlString = url;
@@ -39,6 +43,8 @@ public class HandleXML {
         String text = null;
         titleLst.clear();
         descLst.clear();
+        startDate.clear();
+        endDate.clear();
 
         try {
             event = myParser.getEventType();
@@ -55,13 +61,25 @@ public class HandleXML {
                         break;
 
                     case XmlPullParser.END_TAG:
+                        //Add all the main items to the lists - This does NOT handle the actual output
                         if (name.equals("title")) {
                             title = text;
                             titleLst.add(title);
                         } else if (name.equals("description")) {
-                            desc = text;
-                            descLst.add(desc);
+                            if(firstDesc == true) {
+                                description = text;
+                                String[] retval = description.split("<br />", 0);
+                                description = description.replaceAll("<br />", "\n");
+                                startDate.add(retval[0]);
+                                endDate.add(retval[1]);
+                                descLst.add(description);
+                            }
+                            else
+                            {
+                                firstDesc = true;
+                            }
                         } else {
+
                         }
                         break;
                 }

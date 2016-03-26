@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.Date;
+
 /**
  * Created by chaos_000 on 25/02/2016.
  * Liam Faulds S1306716
@@ -22,13 +24,14 @@ public class ListViewAdapter extends BaseAdapter {
 
     Activity context;
     String title[];
-    String description[];
+    String startDate[];
+    Date dateComparison[];
 
-    public ListViewAdapter(Activity context, String[] title, String[] description) {
+    public ListViewAdapter(Activity context, String[] title, String[] startDate) {
         super();
         this.context = context;
         this.title = title;
-        this.description = description;
+        this.startDate = startDate;
     }
 
     public int getCount() {
@@ -63,7 +66,8 @@ public class ListViewAdapter extends BaseAdapter {
         }
 
         holder.txtViewTitle.setText(title[position]);
-        holder.txtViewDescription.setText(description[position]);
+        holder.txtViewDescription.setText(startDate[position]);
+        //holder.txtViewDescription.setText("Duration: ");
 
         return convertView;
     }
