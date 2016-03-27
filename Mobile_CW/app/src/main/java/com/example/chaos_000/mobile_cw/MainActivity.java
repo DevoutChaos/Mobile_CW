@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     ListView lstVw1;
     ListViewAdapter lstVwAda;
     RelativeLayout ambLayout;
-    TextView tit, desc, link, geo;
+    TextView tit, desc, link, geo, ambi;
     EditText searchInput;
     private ViewFlipper switcher;
     private static final int REFRESH_SCREEN = 1;
@@ -124,9 +124,14 @@ public class MainActivity extends Activity implements OnItemClickListener {
         desc = (TextView) findViewById(R.id.descTxtView);
         link = (TextView) findViewById(R.id.linkTxtView);
         geo = (TextView) findViewById(R.id.geoTxtView);
+        ambi = (TextView) findViewById(R.id.countOfIncs);
         lstVw1 = (ListView) findViewById(R.id.mainListView);
         searchInput = (EditText) findViewById(R.id.editText);
         ambLayout = (RelativeLayout) findViewById(R.id.ambRelLay);
+
+        but4.setEnabled(false);
+        but5.setEnabled(false);
+        searchInput.setEnabled(false);
 
         but1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,6 +141,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 xmlObj.fetchXML();
                 while (xmlObj.parsingComplete) ;
                 ImportantThing();
+                but4.setEnabled(true);
+                but5.setEnabled(true);
+                searchInput.setEnabled(true);
             }
         });
 
@@ -154,6 +162,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 xmlObj.fetchXML();
                 while (xmlObj.parsingComplete) ;
                 ImportantThing();
+                but4.setEnabled(true);
+                but5.setEnabled(true);
+                searchInput.setEnabled(true);
             }
         });
 
@@ -165,6 +176,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 startDateAlt.clear();
                 endDateAlt.clear();
                 descLstAlt.clear();
+                durationAlt.clear();
                 searchTerm = searchInput.getText().toString();
                 DateFormat format = new SimpleDateFormat("dd-MM-yy", Locale.ENGLISH);
                 try {
@@ -198,6 +210,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
         but5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                ambi.setText("Current Incidents: " + count);
                 SwitchToAmbient();
             }
         });
@@ -348,6 +361,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     public void DateCompare() {
         if (showingAll == true) {
+            duration.clear();
             for (int i = 0; i < count; i++) {
                 long temp = Math.abs(searchArr[i][1].getTime() - searchArr[i][0].getTime());
                 long tempDays = temp / (24 * 60 * 60 * 1000);

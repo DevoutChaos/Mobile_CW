@@ -59,7 +59,6 @@ public class ListViewAdapter extends BaseAdapter {
         TextView txtViewTitle;
         TextView txtViewStartDate;
         TextView txtViewEndDate;
-        ImageView imageView;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {

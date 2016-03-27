@@ -53,8 +53,9 @@
             android:id="@+id/editText"
             android:layout_below="@+id/button3"
             android:layout_alignParentStart="true"
-            android:hint="Type a date to search"
-            android:layout_toStartOf="@+id/button4" />
+            android:hint="dd-mm-yy"
+            android:layout_toStartOf="@+id/button4"
+            android:textAlignment="center" />
 
         <ListView
             android:id="@+id/mainListView"
@@ -159,10 +160,11 @@
         android:id="@+id/ambRelLay">
 
         <TextView
-            android:id="@+id/testField"
+            android:id="@+id/countOfIncs"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
             android:paddingLeft="5dp"
             android:text="THIS IS A TEST!!!"
             android:textSize="18sp" />
@@ -171,7 +173,7 @@
             android:id="@+id/button6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/testField"
+            android:layout_below="@+id/countOfIncs"
             android:layout_centerHorizontal="true"
             android:text="Return" />
     </RelativeLayout>
