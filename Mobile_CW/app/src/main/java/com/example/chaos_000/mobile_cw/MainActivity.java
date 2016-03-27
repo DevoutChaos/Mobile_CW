@@ -59,6 +59,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     private String rdWrks = "http://trafficscotland.org/rss/feeds/roadworks.aspx";
     private String pRdWrks = "http://trafficscotland.org/rss/feeds/plannedroadworks.aspx";
     private HandleXML xmlObj;
+    private boolean showingAll = false;
     int count;
 
     String[] titleArr;
@@ -72,10 +73,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
     int[] foundArr;
     String searchTerm;
     String[] titleArrAlt;
+    String[] descArrAlt;
     Date dateToFind;
     Date[] sDArrAlt;
     Date[] eDArrAlt;
     public static List<String> titleLstAlt = new ArrayList<>();
+    public static List<String> descLstAlt = new ArrayList<>();
     public static List<Date> startDateAlt = new ArrayList<>();
     public static List<Date> endDateAlt = new ArrayList<>();
     int searchCount;
@@ -101,7 +104,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
             public void onClick(View view) {
                 xmlObj = new HandleXML(rdWrks);
                 xmlObj.fetchXML();
-                while (xmlObj.parsingComplete) ;
+                while (xmlObj.parsingComplete);
+                showingAll = true;
                 ImportantThing();
             }
         });
@@ -119,6 +123,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 xmlObj = new HandleXML(pRdWrks);
                 xmlObj.fetchXML();
                 while (xmlObj.parsingComplete) ;
+                showingAll = true;
                 ImportantThing();
             }
         });
@@ -129,6 +134,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 titleLstAlt.clear();
                 startDateAlt.clear();
                 endDateAlt.clear();
+                descLstAlt.clear();
                 searchTerm = searchInput.getText().toString();
                 DateFormat format = new SimpleDateFormat("dd-MM-yy", Locale.ENGLISH);
                 try {
@@ -144,14 +150,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 for (int z = 0; z < count; z++) {
                     if (((searchArr[z][2].after(searchArr[z][0])) || (searchArr[z][2].equals(searchArr[z][0]))) && ((searchArr[z][2].before(searchArr[z][1])) || (searchArr[z][2].equals(searchArr[z][1])))) {
                         titleLstAlt.add(titleArr[z]);
+                        descLstAlt.add(descArr[z]);
                         startDateAlt.add(sDArr[z]);
                         endDateAlt.add(eDArr[z]);
                     }
                 }
                 titleArrAlt = titleLstAlt.toArray(new String[0]);
+                descArrAlt = descLstAlt.toArray(new String[0]);
                 sDArrAlt = startDateAlt.toArray(new Date[0]);
                 eDArrAlt = endDateAlt.toArray(new Date[0]);
                 ShowingTheSearch();
+                showingAll = false;
             }
         });
     }
@@ -171,9 +180,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
         System.out.println("adapter => " + count);
         Toast.makeText(this, "Roadworks found: " + count, Toast.LENGTH_SHORT).show();
         searchArr = new Date[count][3];
+        //Adds the start date to an array so that we can use it later for functions and searching more easily
         for (int i = 0; i < count; i++) {
             searchArr[i][0] = sDArr[i];
         }
+        //Adds the end date to an array so that we can use it later for functions and searching more easily
         for (int x = 0; x < count; x++) {
             searchArr[x][1] = eDArr[x];
         }
@@ -194,20 +205,40 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 
     public void onItemClick(AdapterView<?> arg0, View arg1, int position, long id) {
-        tit.setText(titleArr[position]);
-        desc.setText(descArr[position]);
-        link.setText("For more information, go to: \n" + linkArr[position]);
-        geo.setText("Coordinates: \n" + geoArr[position]);
+        //We need to separate the search list from the regular list
+        if (showingAll == true) {
+            tit.setText(titleArr[position]);
+            desc.setText(descArr[position]);
+            link.setText("For more information, go to: \n" + linkArr[position]);
+            geo.setText("Coordinates: \n" + geoArr[position]);
 
-        new Thread() {
-            public void run() {
-                try {
-                    Refresh.sendEmptyMessage(REFRESH_SCREEN);
-                } catch (Exception e) {
+            new Thread() {
+                public void run() {
+                    try {
+                        Refresh.sendEmptyMessage(REFRESH_SCREEN);
+                    } catch (Exception e) {
 
+                    }
                 }
-            }
-        }.start();
+            }.start();
+        }
+        else
+        {
+            tit.setText(titleArrAlt[position]);
+            desc.setText(descArrAlt[position]);
+            link.setText("For more information, go to: \n" + linkArr[position]);
+            geo.setText("Coordinates: \n" + geoArr[position]);
+
+            new Thread() {
+                public void run() {
+                    try {
+                        Refresh.sendEmptyMessage(REFRESH_SCREEN);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }.start();
+        }
     }
 
     Handler Refresh = new Handler() {
