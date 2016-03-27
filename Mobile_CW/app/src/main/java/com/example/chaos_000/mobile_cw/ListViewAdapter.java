@@ -24,14 +24,15 @@ public class ListViewAdapter extends BaseAdapter {
 
     Activity context;
     String title[];
-    String startDate[];
-    Date dateComparison[];
+    Date startDate[];
+    Date endDate[];
 
-    public ListViewAdapter(Activity context, String[] title, String[] startDate) {
+    public ListViewAdapter(Activity context, String[] title, Date[] startDate, Date[] endDate) {
         super();
         this.context = context;
         this.title = title;
         this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public int getCount() {
@@ -48,7 +49,8 @@ public class ListViewAdapter extends BaseAdapter {
 
     private class ViewHolder {
         TextView txtViewTitle;
-        TextView txtViewDescription;
+        TextView txtViewStartDate;
+        TextView txtViewEndDate;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -59,15 +61,17 @@ public class ListViewAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.row, null);
             holder = new ViewHolder();
             holder.txtViewTitle = (TextView) convertView.findViewById(R.id.txtVwTitle);
-            holder.txtViewDescription = (TextView) convertView.findViewById(R.id.txtVwDesc);
+            holder.txtViewStartDate = (TextView) convertView.findViewById(R.id.txtVwSDate);
+            holder.txtViewEndDate = (TextView) convertView.findViewById(R.id.txtVwEDate);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         holder.txtViewTitle.setText(title[position]);
-        holder.txtViewDescription.setText(startDate[position]);
-        //holder.txtViewDescription.setText("Duration: ");
+        holder.txtViewStartDate.setText("Begins: " + startDate[position].toString());
+        holder.txtViewEndDate.setText("Ends: " + endDate[position].toString());
+        //holder.txtViewEndDate.setText("Duration" + dateComparison[position]);
 
         return convertView;
     }

@@ -12,10 +12,18 @@
         android:textSize="24sp" />
 
     <TextView
-        android:id="@+id/txtVwDesc"
+        android:id="@+id/txtVwSDate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/label"
+        android:layout_below="@+id/txtVwTitle"
+        android:paddingLeft="5dp"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/txtVwEDate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txtVwSDate"
         android:paddingLeft="5dp"
         android:textSize="18sp" />
 

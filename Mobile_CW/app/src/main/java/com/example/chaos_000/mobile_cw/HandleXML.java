@@ -6,9 +6,12 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
@@ -23,16 +26,20 @@ import java.util.StringTokenizer;
  */
 
 public class HandleXML {
-    private String title, description;
+    private String title, description, link, geo;
     private String urlString = null;
     private XmlPullParserFactory xmlFactoryObject;
     public volatile boolean parsingComplete = true;
     private boolean firstDesc = false;
+    private boolean firstTit = false;
+    private boolean firstLink = false;
 
     public static List<String> titleLst = new ArrayList<>();
     public static List<String> descLst = new ArrayList<>();
-    public static List<String> startDate = new ArrayList<>();
-    public static List<String> endDate = new ArrayList<>();
+    public static List<String> linkLst = new ArrayList<>();
+    public static List<String> geoLst = new ArrayList<>();
+    public static List<Date> startDate = new ArrayList<>();
+    public static List<Date> endDate = new ArrayList<>();
 
     public HandleXML(String url) {
         this.urlString = url;
@@ -43,6 +50,8 @@ public class HandleXML {
         String text = null;
         titleLst.clear();
         descLst.clear();
+        linkLst.clear();
+        geoLst.clear();
         startDate.clear();
         endDate.clear();
 
@@ -63,21 +72,50 @@ public class HandleXML {
                     case XmlPullParser.END_TAG:
                         //Add all the main items to the lists - This does NOT handle the actual output
                         if (name.equals("title")) {
-                            title = text;
-                            titleLst.add(title);
-                        } else if (name.equals("description")) {
-                            if(firstDesc == true) {
-                                description = text;
-                                String[] retval = description.split("<br />", 0);
-                                description = description.replaceAll("<br />", "\n");
-                                startDate.add(retval[0]);
-                                endDate.add(retval[1]);
-                                descLst.add(description);
+                            if (firstTit == true) {
+                                title = text;
+                                titleLst.add(title);
+                            } else {
+                                firstTit = true;
                             }
-                            else
-                            {
+                        } else if (name.equals("description")) {
+                            if (firstDesc == true) {
+
+                                //Sets the description
+                                description = text;
+
+                                //Splits around the break tag to let us get the date
+                                String[] retval = description.split("<br />", 0);
+
+                                //Removes the break tag for the short view
+                                description = description.replaceAll("<br />", "\n");
+
+                                //Jiggery pokery to get the date in a usable format
+                                retval[0] = retval[0].replaceAll("Start Date: ", "");
+                                retval[0] = retval[0].replaceAll(" - 00:00", "");
+                                retval[1] = retval[1].replaceAll("End Date: ", "");
+                                retval[1] = retval[1].replaceAll(" - 00:00", "");
+                                DateFormat format = new SimpleDateFormat("EEEE, dd MMMM yyyy", Locale.ENGLISH);
+                                Date sDate = format.parse(retval[0]);
+                                Date eDate = format.parse(retval[1]);
+
+                                //Putting everything into the list it belongs to
+                                startDate.add(sDate);
+                                endDate.add(eDate);
+                                descLst.add(description);
+                            } else {
                                 firstDesc = true;
                             }
+                        } else if (name.equals("link")) {
+                            if (firstLink == true) {
+                                link = text;
+                                linkLst.add(link);
+                            } else {
+                                firstLink = true;
+                            }
+                        } else if (name.equals("georss:point")) {
+                            geo = text;
+                            geoLst.add(geo);
                         } else {
 
                         }
@@ -86,9 +124,14 @@ public class HandleXML {
                 event = myParser.next();
             }
             parsingComplete = false;
-        } catch (Exception e) {
+        } catch (
+                Exception e
+                )
+
+        {
             e.printStackTrace();
         }
+
     }
 
     public void fetchXML() {
