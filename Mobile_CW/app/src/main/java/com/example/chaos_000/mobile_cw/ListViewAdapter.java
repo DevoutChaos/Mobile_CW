@@ -1,12 +1,18 @@
 package com.example.chaos_000.mobile_cw;
 
+import java.lang.Object;
+
 import android.app.Activity;
+import android.graphics.Color;
+import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -24,15 +30,17 @@ public class ListViewAdapter extends BaseAdapter {
 
     Activity context;
     String title[];
+    String duration[];
     Date startDate[];
     Date endDate[];
 
-    public ListViewAdapter(Activity context, String[] title, Date[] startDate, Date[] endDate) {
+    public ListViewAdapter(Activity context, String[] title, Date[] startDate, Date[] endDate, String[] duration) {
         super();
         this.context = context;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.duration = duration;
     }
 
     public int getCount() {
@@ -51,9 +59,11 @@ public class ListViewAdapter extends BaseAdapter {
         TextView txtViewTitle;
         TextView txtViewStartDate;
         TextView txtViewEndDate;
+        ImageView imageView;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
+
         ViewHolder holder;
         LayoutInflater inflater = context.getLayoutInflater();
 
@@ -71,7 +81,24 @@ public class ListViewAdapter extends BaseAdapter {
         holder.txtViewTitle.setText(title[position]);
         holder.txtViewStartDate.setText("Begins: " + startDate[position].toString());
         holder.txtViewEndDate.setText("Ends: " + endDate[position].toString());
-        //holder.txtViewEndDate.setText("Duration" + dateComparison[position]);
+
+        if (duration[position] == "Long") {
+            holder.txtViewTitle.setBackgroundColor(Color.RED);
+            holder.txtViewStartDate.setBackgroundColor(Color.RED);
+            holder.txtViewEndDate.setBackgroundColor(Color.RED);
+        } else if (duration[position] == "Med") {
+            holder.txtViewTitle.setBackgroundColor(Color.YELLOW);
+            holder.txtViewStartDate.setBackgroundColor(Color.YELLOW);
+            holder.txtViewEndDate.setBackgroundColor(Color.YELLOW);
+        } else if (duration[position] == "Short") {
+            holder.txtViewTitle.setBackgroundColor(Color.GREEN);
+            holder.txtViewStartDate.setBackgroundColor(Color.GREEN);
+            holder.txtViewEndDate.setBackgroundColor(Color.GREEN);
+        } else {
+            holder.txtViewTitle.setBackgroundColor(Color.DKGRAY);
+            holder.txtViewStartDate.setBackgroundColor(Color.DKGRAY);
+            holder.txtViewEndDate.setBackgroundColor(Color.DKGRAY);
+        }
 
         return convertView;
     }

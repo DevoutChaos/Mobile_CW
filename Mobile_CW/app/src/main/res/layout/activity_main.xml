@@ -1,6 +1,6 @@
-<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ViewSwitcher"
+    android:id="@+id/ViewFlipper"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -22,26 +22,26 @@
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
             android:text="S1306716"
-            android:textSize="35dp" />
+            android:textSize="35dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
 
         <Button
             android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Current Roadworks"
-            android:layout_alignTop="@+id/button3"
-            android:layout_alignParentEnd="true"
-            android:layout_toEndOf="@+id/textView" />
+            android:layout_alignBaseline="@+id/button3"
+            android:layout_alignBottom="@+id/button3"
+            android:layout_alignParentEnd="true" />
 
         <Button
             android:id="@+id/button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Planned Roadworks"
-            android:layout_below="@+id/textView2"
+            android:layout_below="@+id/textView"
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@+id/button" />
 
@@ -71,6 +71,16 @@
             android:layout_alignTop="@+id/editText"
             android:layout_alignEnd="@+id/textView2"
             android:layout_toEndOf="@+id/button3" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ambient Mode"
+            android:id="@+id/button5"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_above="@+id/button"
+            android:layout_toEndOf="@+id/textView" />
 
     </RelativeLayout>
 
@@ -142,6 +152,28 @@
             android:paddingLeft="5dp"
             android:textSize="18sp"/>
     </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/testField"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:paddingLeft="5dp"
+            android:text="THIS IS A TEST!!!"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/testField"
+            android:layout_centerHorizontal="true"
+            android:text="Return" />
+    </RelativeLayout>
     <!--/**
         * Created by chaos_000 on 25/02/2016.
         * Liam Faulds S1306716
@@ -152,4 +184,4 @@
         * http://www.technotalkative.com/android-listview-2-custom-listview/
         *  ^ First Accessed 24/02/2016, used to group a pair of TextViews into a ListView
         */-->
-</ViewSwitcher>
+</ViewFlipper>

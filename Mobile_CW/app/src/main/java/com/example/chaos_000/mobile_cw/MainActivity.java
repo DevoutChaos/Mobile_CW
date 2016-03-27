@@ -17,12 +17,14 @@ import android.view.View;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 import android.widget.ViewSwitcher;
 
 import java.text.DateFormat;
@@ -33,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Exchanger;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by chaos_000 on 25/02/2016.
@@ -44,16 +47,16 @@ import java.util.concurrent.Exchanger;
  * http://www.technotalkative.com/android-listview-2-custom-listview/
  * ^ First Accessed 24/02/2016, used to group a pair of TextViews into a ListView
  * <p/>
- * GOOGLE VIEWSWITCHER!!!
  */
 
 public class MainActivity extends Activity implements OnItemClickListener {
-    Button but1, but2, but3, but4;
+    Button but1, but2, but3, but4, but5, but6;
     ListView lstVw1;
     ListViewAdapter lstVwAda;
     TextView tit, desc, link, geo;
     EditText searchInput;
-    private ViewSwitcher switcher;
+    ImageView iv;
+    private ViewFlipper switcher;
     private static final int REFRESH_SCREEN = 1;
 
     private String rdWrks = "http://trafficscotland.org/rss/feeds/roadworks.aspx";
@@ -66,6 +69,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     String[] descArr;
     String[] linkArr;
     String[] geoArr;
+    String[] durationArr;
     Date[] sDArr;
     Date[] eDArr;
 
@@ -74,6 +78,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     String searchTerm;
     String[] titleArrAlt;
     String[] descArrAlt;
+    String[] durationArrAlt;
     Date dateToFind;
     Date[] sDArrAlt;
     Date[] eDArrAlt;
@@ -81,17 +86,21 @@ public class MainActivity extends Activity implements OnItemClickListener {
     public static List<String> descLstAlt = new ArrayList<>();
     public static List<Date> startDateAlt = new ArrayList<>();
     public static List<Date> endDateAlt = new ArrayList<>();
+    public static List<String> duration = new ArrayList<>();
+    public static List<String> durationAlt = new ArrayList<>();
     int searchCount;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        switcher = (ViewSwitcher) findViewById(R.id.ViewSwitcher);
+        switcher = (ViewFlipper) findViewById(R.id.ViewFlipper);
         but1 = (Button) findViewById(R.id.button);
         but2 = (Button) findViewById(R.id.button2);
         but3 = (Button) findViewById(R.id.button3);
         but4 = (Button) findViewById(R.id.button4);
+        but5 = (Button) findViewById(R.id.button5);
+        but6 = (Button) findViewById(R.id.button6);
         tit = (TextView) findViewById(R.id.titTxtView);
         desc = (TextView) findViewById(R.id.descTxtView);
         link = (TextView) findViewById(R.id.linkTxtView);
@@ -102,10 +111,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
         but1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showingAll = true;
                 xmlObj = new HandleXML(rdWrks);
                 xmlObj.fetchXML();
                 while (xmlObj.parsingComplete);
-                showingAll = true;
                 ImportantThing();
             }
         });
@@ -120,10 +129,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
         but3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showingAll = true;
                 xmlObj = new HandleXML(pRdWrks);
                 xmlObj.fetchXML();
                 while (xmlObj.parsingComplete) ;
-                showingAll = true;
                 ImportantThing();
             }
         });
@@ -131,6 +140,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
         but4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showingAll = false;
                 titleLstAlt.clear();
                 startDateAlt.clear();
                 endDateAlt.clear();
@@ -153,16 +163,33 @@ public class MainActivity extends Activity implements OnItemClickListener {
                         descLstAlt.add(descArr[z]);
                         startDateAlt.add(sDArr[z]);
                         endDateAlt.add(eDArr[z]);
+                        durationAlt.add(durationArr[z]);
                     }
                 }
                 titleArrAlt = titleLstAlt.toArray(new String[0]);
                 descArrAlt = descLstAlt.toArray(new String[0]);
+                durationArrAlt = durationAlt.toArray(new String[0]);
                 sDArrAlt = startDateAlt.toArray(new Date[0]);
                 eDArrAlt = endDateAlt.toArray(new Date[0]);
                 ShowingTheSearch();
-                showingAll = false;
             }
         });
+
+        but5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AnotherImportantThing();
+            }
+        });
+
+
+        but6.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                YetAnotherImportantThing();
+            }
+        });
+
     }
 
     public void ImportantThing() {
@@ -172,30 +199,28 @@ public class MainActivity extends Activity implements OnItemClickListener {
         geoArr = HandleXML.geoLst.toArray(new String[0]);
         sDArr = HandleXML.startDate.toArray(new Date[0]);
         eDArr = HandleXML.endDate.toArray(new Date[0]);
+        count = titleArr.length;
 
-        lstVwAda = new ListViewAdapter(this, titleArr, sDArr, eDArr);
+        SearchPrep();
+        DateCompare();
+
+        lstVwAda = new ListViewAdapter(this, titleArr, sDArr, eDArr, durationArr);
         lstVw1.setAdapter(lstVwAda);
         lstVw1.setOnItemClickListener(this);
-        count = lstVwAda.getCount();
         System.out.println("adapter => " + count);
         Toast.makeText(this, "Roadworks found: " + count, Toast.LENGTH_SHORT).show();
-        searchArr = new Date[count][3];
-        //Adds the start date to an array so that we can use it later for functions and searching more easily
-        for (int i = 0; i < count; i++) {
-            searchArr[i][0] = sDArr[i];
-        }
-        //Adds the end date to an array so that we can use it later for functions and searching more easily
-        for (int x = 0; x < count; x++) {
-            searchArr[x][1] = eDArr[x];
-        }
     }
 
     public void AnotherImportantThing() {
         switcher.showPrevious();
     }
 
+    public void YetAnotherImportantThing() {
+        switcher.showNext();
+    }
+
     public void ShowingTheSearch() {
-        lstVwAda = new ListViewAdapter(this, titleArrAlt, sDArrAlt, eDArrAlt);
+        lstVwAda = new ListViewAdapter(this, titleArrAlt, sDArrAlt, eDArrAlt, durationArrAlt);
         lstVw1.setAdapter(lstVwAda);
         lstVw1.setOnItemClickListener(this);
         searchCount = lstVwAda.getCount();
@@ -253,4 +278,42 @@ public class MainActivity extends Activity implements OnItemClickListener {
             }
         }
     };
+
+    public void SearchPrep()
+    {
+        searchArr = new Date[count][3];
+        //Adds the start date to an array so that we can use it later for functions and searching more easily
+        for (int i = 0; i < count; i++) {
+            searchArr[i][0] = sDArr[i];
+        }
+        //Adds the end date to an array so that we can use it later for functions and searching more easily
+        for (int x = 0; x < count; x++) {
+            searchArr[x][1] = eDArr[x];
+        }
+    }
+
+    public void DateCompare()
+    {
+        if (showingAll == true)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                long temp = Math.abs(searchArr[i][1].getTime() - searchArr[i][0].getTime());
+                long tempDays = temp / (24 * 60 * 60 * 1000);
+                if (tempDays > 30)
+                {
+                    duration.add("Long");
+                }
+                else if (tempDays > 10)
+                {
+                    duration.add("Med");
+                }
+                else
+                {
+                    duration.add("Short");
+                }
+            }
+            durationArr = duration.toArray(new String[0]);
+        }
+    }
 }
