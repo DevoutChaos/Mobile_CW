@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
@@ -22,6 +23,7 @@ import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -34,6 +36,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Exchanger;
 import java.util.concurrent.TimeUnit;
 
@@ -50,21 +54,24 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class MainActivity extends Activity implements OnItemClickListener {
+    //Interface Declarations
     Button but1, but2, but3, but4, but5, but6;
     ListView lstVw1;
     ListViewAdapter lstVwAda;
+    RelativeLayout ambLayout;
     TextView tit, desc, link, geo;
     EditText searchInput;
-    ImageView iv;
     private ViewFlipper switcher;
     private static final int REFRESH_SCREEN = 1;
 
+    //Parsing Declarations
     private String rdWrks = "http://trafficscotland.org/rss/feeds/roadworks.aspx";
     private String pRdWrks = "http://trafficscotland.org/rss/feeds/plannedroadworks.aspx";
     private HandleXML xmlObj;
     private boolean showingAll = false;
     int count;
 
+    //Main arrays for data
     String[] titleArr;
     String[] descArr;
     String[] linkArr;
@@ -73,6 +80,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
     Date[] sDArr;
     Date[] eDArr;
 
+    //Arrays for search function
     Date[][] searchArr;
     int[] foundArr;
     String searchTerm;
@@ -89,6 +97,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
     public static List<String> duration = new ArrayList<>();
     public static List<String> durationAlt = new ArrayList<>();
     int searchCount;
+
+    //Declarations for Ambient Mode
+    public int randomColour;
+    int r;
+    int g;
+    int b;
+    int minSleep = 5000;
+    int trueSleep;
+    boolean ambient = false;
+    boolean runningThread = false;
+    Timer timer;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +126,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
         geo = (TextView) findViewById(R.id.geoTxtView);
         lstVw1 = (ListView) findViewById(R.id.mainListView);
         searchInput = (EditText) findViewById(R.id.editText);
+        ambLayout = (RelativeLayout) findViewById(R.id.ambRelLay);
 
         but1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +134,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                 showingAll = true;
                 xmlObj = new HandleXML(rdWrks);
                 xmlObj.fetchXML();
-                while (xmlObj.parsingComplete);
+                while (xmlObj.parsingComplete) ;
                 ImportantThing();
             }
         });
@@ -178,15 +198,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
         but5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AnotherImportantThing();
+                SwitchToAmbient();
             }
         });
-
 
         but6.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 YetAnotherImportantThing();
+                ambient = false;
             }
         });
 
@@ -217,6 +237,32 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
     public void YetAnotherImportantThing() {
         switcher.showNext();
+        runningThread = false;
+        timer.cancel();
+    }
+
+    public void SwitchToAmbient() {
+        new Thread() {
+            public void run() {
+                try {
+                    Refresh.sendEmptyMessage(REFRESH_SCREEN);
+                } catch (Exception e) {
+
+                }
+            }
+        }.start();
+
+        ambient = true;
+
+        if (count > 0) {
+            trueSleep = ((minSleep / (count / 2)) * 10);
+        } else {
+            trueSleep = (minSleep / 1);
+        }
+
+            timer  = new Timer();
+            timer.schedule(new AmbientTask(), 100, (trueSleep));
+
     }
 
     public void ShowingTheSearch() {
@@ -246,9 +292,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
                     }
                 }
             }.start();
-        }
-        else
-        {
+        } else {
             tit.setText(titleArrAlt[position]);
             desc.setText(descArrAlt[position]);
             link.setText("For more information, go to: \n" + linkArr[position]);
@@ -270,17 +314,27 @@ public class MainActivity extends Activity implements OnItemClickListener {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case REFRESH_SCREEN:
-                    switcher.showNext();
+                    if (ambient == false) {
+                        switcher.showNext();
+                    }
+                    else
+                    {
+                        if (runningThread == true) {
+                            ambLayout.setBackgroundColor(randomColour);
+                        }
+                        else
+                        {
+                            switcher.showPrevious();
+                        }
+                    }
                     break;
-
                 default:
                     break;
             }
         }
     };
 
-    public void SearchPrep()
-    {
+    public void SearchPrep() {
         searchArr = new Date[count][3];
         //Adds the start date to an array so that we can use it later for functions and searching more easily
         for (int i = 0; i < count; i++) {
@@ -292,28 +346,41 @@ public class MainActivity extends Activity implements OnItemClickListener {
         }
     }
 
-    public void DateCompare()
-    {
-        if (showingAll == true)
-        {
-            for (int i = 0; i < count; i++)
-            {
+    public void DateCompare() {
+        if (showingAll == true) {
+            for (int i = 0; i < count; i++) {
                 long temp = Math.abs(searchArr[i][1].getTime() - searchArr[i][0].getTime());
                 long tempDays = temp / (24 * 60 * 60 * 1000);
-                if (tempDays > 30)
-                {
+                if (tempDays > 30) {
                     duration.add("Long");
-                }
-                else if (tempDays > 10)
-                {
+                } else if (tempDays > 10) {
                     duration.add("Med");
-                }
-                else
-                {
+                } else {
                     duration.add("Short");
                 }
             }
             durationArr = duration.toArray(new String[0]);
+        }
+    }
+
+    class AmbientTask extends TimerTask {
+        public void run() {
+            try {
+                Refresh.sendEmptyMessage(REFRESH_SCREEN);
+                GetRandom();
+            } catch (Exception e) {
+
+            }
+        }
+
+        public void GetRandom()
+        {
+            runningThread = true;
+            r = (int) (Math.random() * 256);
+            g = (int) (Math.random() * 256);
+            b = (int) (Math.random() * 256);
+            randomColour = Color.rgb(r, g, b);
+            System.out.println("Wait = " + trueSleep + "     " + randomColour);
         }
     }
 }
