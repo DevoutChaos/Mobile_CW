@@ -4,15 +4,12 @@ import java.lang.Object;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
 import java.util.Date;
 
 /**
